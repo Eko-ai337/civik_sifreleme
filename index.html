@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>CIVIK ŞİFRELEME - Aşama 2</title>
+    <style>
+        body {
+            background-color: rgb(0, 0, 0);
+            color: #00ff40;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            border: 2px solid rgb(0, 255, 149);
+            padding: 30px;
+            box-shadow: 0 0 50px rgb(0, 255, 149);
+            background: rgba(0, 0, 0, 0.9);
+            width: 450px;
+            text-align: center;
+        }
+        textarea {
+            width: 100%;
+            background: #000000;
+            color: #00ff41;
+            border: 1px solid #00ff41;
+            margin-bottom: 15px;
+            padding: 10px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+        }
+        button {
+            background: #00ff41;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: 0.3s;
+        }
+        button:hover {
+            background: rgb(0, 0, 0);
+            color: white;
+            box-shadow: 0 0 25px #00ff41;
+        }
+        #result {
+            margin-top: 20px;
+            word-wrap: break-word;
+            font-size: 1.2em;
+            color: #fff;
+            text-shadow: 0 0 5px #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .info {
+            font-size: 0.8em;
+            color: #00ff41;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>[ CIVIK ŞİFRELEME ]</h2>
+    <p class="info">Aşama 2: Harita & Mesafe Entegrasyonu</p>
+    <textarea id="input" rows="4" placeholder="Metni veya sayısal bloğu buraya girin..."></textarea>
+    <br>
+    <button onclick="sifrele()">SİFRELE 🔒</button>
+    <button onclick="coz()">DESİFRELE 🔓</button>
+    <div id="result">Bekleniyor...</div>
+</div>
+
+<script>
+    // 10 Harita ve Koordinat Verileri
+    const haritalar = [
+        [{x:50,y:50}, {x:10,y:10}, {x:90,y:90}, {x:10,y:90}, {x:90,y:10}], // 0
+        [{x:0,y:0}, {x:0,y:100}, {x:100,y:100}, {x:100,y:0}, {x:50,y:50}], // 1
+        [{x:23,y:67}, {x:88,y:12}, {x:45,y:39}, {x:12,y:88}, {x:70,y:70}], // 2
+        [{x:10,y:20}, {x:20,y:30}, {x:30,y:40}, {x:40,y:50}, {x:50,y:60}], // 3
+        [{x:25,y:25}, {x:25,y:75}, {x:75,y:25}, {x:75,y:75}, {x:50,y:50}], // 4
+        [{x:15,y:45}, {x:30,y:60}, {x:45,y:75}, {x:60,y:90}, {x:75,y:10}], // 5
+        [{x:5,y:5}, {x:95,y:5}, {x:50,y:95}, {x:25,y:50}, {x:75,y:50}],    // 6
+        [{x:40,y:40}, {x:41,y:41}, {x:59,y:59}, {x:60,y:60}, {x:50,y:50}], // 7
+        [{x:10,y:90}, {x:20,y:80}, {x:30,y:70}, {x:80,y:20}, {x:90,y:10}], // 8
+        [{x:0,y:50}, {x:50,y:50}, {x:100,y:50}, {x:50,y:0}, {x:50,y:100}]  // 9
+    ];
+
+    function getMesafe(h, n1, n2) {
+        let p1 = haritalar[h][n1];
+        let p2 = haritalar[h][n2];
+        let d = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+        return Math.round(d);
+    }
+
+    function sifrele() {
+        let metin = document.getElementById("input").value;
+        if(!metin) return;
+
+        // Kullanıcıdan Harita Seçimi Al
+        let h = parseInt(prompt("Harita ID girin (0-9):", "0"));
+        let n1 = parseInt(prompt("Nokta 1 girin (0-4):", "0"));
+        let n2 = parseInt(prompt("Nokta 2 girin (0-4):", "1"));
+
+        let mesafe = getMesafe(h, n1, n2);
+        let sonuc = "";
+
+        for (let i = 0; i < metin.length; i++) {
+            // Aşama 1
+            let x = (metin.charCodeAt(i) * 11) % 127;
+            // Aşama 2: Mesafeyi ekle
+            let nihai = (x + mesafe) % 127;
+            
+            sonuc += nihai.toString().padStart(3, '0');
+        }
+        document.getElementById("result").innerText = "KİLİTLENDİ: " + sonuc;
+    }
+
+    function coz() {
+        let metin = document.getElementById("input").value;
+        if(!metin) return;
+
+        // Şifrelerken kullanılan aynı değerleri girmeli
+        let h = parseInt(prompt("Çözme için Harita ID:", "0"));
+        let n1 = parseInt(prompt("Çözme için Nokta 1:", "0"));
+        let n2 = parseInt(prompt("Çözme için Nokta 2:", "1"));
+
+        let mesafe = getMesafe(h, n1, n2);
+        let sonuc = "";
+
+        for (let i = 0; i < metin.length; i += 3) {
+            let blok = metin.substr(i, 3);
+            let c = parseInt(blok);
+            
+            // Aşama 2: Mesafeyi geri çıkar
+            let x = (c - mesafe) % 127;
+            if (x < 0) x += 127;
+
+            // Aşama 1: Orijinal ASCII'ye dön
+            let orijinal_ascii = (x * 104) % 127;
+            sonuc += String.fromCharCode(orijinal_ascii);
+        }
+        document.getElementById("result").innerText = "ÇÖZÜLDÜ: " + sonuc;
+    }
+</script>
+
+</body>
+</html>
